@@ -16,7 +16,7 @@ coverage
 firebase.json
 .firebase
 *.firebaserc
-env.d.ts
+.env
 
 /cypress/videos/
 /cypress/screenshots/
