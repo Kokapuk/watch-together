@@ -4,7 +4,7 @@
       <h1 class="font-weight-700 font-size-50 mb-50">Watch Together</h1>
       <form @submit.prevent="submitHandler">
         <input v-model="videoLink" class="d-block mb-20 w-100" type="url" placeholder="Video link" required />
-        <button class="me-10" type="submit" :disabled="createRoomDisabled">Create room</button>
+        <button class="mb-10 me-10" type="submit" :disabled="createRoomDisabled">Create room</button>
         <RouterLink to="/rooms"><button type="button">Find room</button></RouterLink>
       </form>
     </div>

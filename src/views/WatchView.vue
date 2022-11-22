@@ -56,7 +56,9 @@ onBeforeMount(async () => {
 
 onBeforeUnmount(async () => {
   if (!deletingRoom.value && videoLink.value) {
+    deletingRoom.value = true;
     const leaveAction: IAction = { type: ActionType.leave, position: 0, uuid };
+
     await dbStore.setLastAction(leaveAction, roomUid.value!);
   }
 });
@@ -107,6 +109,8 @@ async function playHandler() {
 }
 
 async function pauseHandler() {
+  if (deletingRoom.value) return;
+
   console.log(`Pause: ${videoElement.value!.currentTime} ${trustedPause.value} ${uuid}`);
 
   if (trustedPause.value) {
