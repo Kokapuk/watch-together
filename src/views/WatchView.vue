@@ -3,19 +3,17 @@
     <div v-if="videoLink" class="container center-y">
       <video
         v-if="!deletingRoom"
-        class="mb-10 d-block"
+        class="mb-10 d-block video"
         ref="videoElement"
         @play="playHandler"
         @pause="pauseHandler"
         @seeked="seekHandler"
         @canplay="canPlayHandler"
-        width="960"
-        height="540"
         :src="videoLink!"
         controls
         controlsList="noplaybackrate nodownload" />
-      <button :disabled="deletingRoom" @click="syncHandler" class="me-10">Sync</button>
-      <button :disabled="deletingRoom" @click="deleteRoomHandler" class="danger me-10">Delete room</button>
+      <button :disabled="deletingRoom" @click="syncHandler" class="me-10 mb-10">Sync</button>
+      <button :disabled="deletingRoom" @click="deleteRoomHandler" class="danger me-10 mb-10">Delete room</button>
       <button :disabled="deletingRoom" class="danger" @click="() => router.push('/')">Leave the room</button>
     </div>
     <div v-else class="center-y">
@@ -180,5 +178,10 @@ function emitPause() {
 <style scoped>
 .container {
   position: relative;
+}
+
+.video {
+  width: 64vw;
+  height: 36vw;
 }
 </style>
