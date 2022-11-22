@@ -56,8 +56,6 @@ export const useDbStore = defineStore('db', {
 
           this.rooms.push(foundRoom);
         });
-
-        console.log(this.rooms);
       });
     },
     async setLastAction(action: IAction, roomUid: string) {
