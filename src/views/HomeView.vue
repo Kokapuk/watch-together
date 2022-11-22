@@ -1,0 +1,31 @@
+<template>
+  <div class="center">
+    <div class="center-y">
+      <h1 class="font-weight-700 font-size-50 mb-50">Watch Together</h1>
+      <form @submit.prevent="submitHandler">
+        <input v-model="videoLink" class="d-block mb-20 w-100" type="url" placeholder="Video link" required />
+        <button class="me-10" type="submit" :disabled="createRoomDisabled">Create room</button>
+        <RouterLink to="/rooms"><button type="button">Find room</button></RouterLink>
+      </form>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { uid } from 'uid';
+import { ref } from 'vue';
+import router from '../router';
+import { useDbStore } from '../stores/db';
+
+const videoLink = ref('');
+const createRoomDisabled = ref(false);
+
+async function submitHandler() {
+  createRoomDisabled.value = true;
+
+  const roomUid = uid(16);
+  await useDbStore().createRoom(roomUid, videoLink.value);
+  console.log(`Created room with link ${videoLink.value}\n\nRoom uid: ${roomUid}`);
+  router.push(`/watch/${roomUid}`);
+}
+</script>

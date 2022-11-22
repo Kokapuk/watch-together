@@ -1,0 +1,68 @@
+@import './base.css';
+@import './utilities.css';
+
+html,
+body,
+#app {
+  background-color: rgb(var(--bg-color));
+  color: white;
+}
+
+button {
+  color: white;
+  background-color: mediumseagreen;
+  padding: 10px 15px;
+  font-size: 17px;
+  cursor: pointer;
+  border-radius: 25px;
+  transition: var(--transition);
+}
+
+button:hover {
+  background-color: lightseagreen;
+}
+
+button:focus {
+  background-color: lightseagreen;
+  box-shadow: 0px 0px 15px 5px rgb(32, 178, 170, 0.35);
+}
+
+button.danger {
+  background-color: crimson;
+}
+
+button:hover.danger {
+  background-color: mediumvioletred;
+}
+
+button:focus.danger {
+  background-color: mediumvioletred;
+  box-shadow: 0px 0px 15px 5px rgba(199, 21, 133, 0.35);
+}
+
+button:disabled,
+button:disabled.danger {
+  cursor: not-allowed;
+  color: gray;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+input[type='text'],
+input[type='password'],
+input[type='url'] {
+  color: white;
+  background-color: rgb(255, 255, 255, 0.1);
+  padding: 10px 15px;
+  font-size: 15px;
+  border-radius: 25px;
+  transition: var(--transition);
+}
+
+input[type='range'] {
+  accent-color: rgb(255, 255, 255, 0.1);
+}
+
+.placeholder-info {
+  color: gray;
+  font-weight: 400;
+}
