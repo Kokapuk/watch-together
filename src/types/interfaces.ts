@@ -8,6 +8,7 @@ export interface IAction {
 
 export interface IRoom {
   uid: string;
+  title: string,
   lastAction: IAction;
   videoLink: string;
 }

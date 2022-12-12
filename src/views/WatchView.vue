@@ -1,6 +1,13 @@
 <template>
   <div class="center">
-    <div v-if="videoLink" class="container center-y">
+    <div class="center-y container" v-if="loading">
+      <div class="flex-center-y mb-10">
+        <div class="title-placeholoder"></div>
+      </div>
+      <div class="video-placeholoder video"></div>
+    </div>
+    <div v-else-if="videoLink" class="container center-y">
+      <h1 class="mb-10">{{ videoTitle }}</h1>
       <video
         v-if="!deletingRoom"
         class="mb-10 d-block video"
@@ -8,6 +15,7 @@
         @play="playHandler"
         @pause="pauseHandler"
         @seeked="seekHandler"
+        @volumechange="volumeChangeHandler"
         @canplay="canPlayHandler"
         :src="videoLink!"
         controls
@@ -25,11 +33,12 @@
 
 <script setup lang="ts">
 import { uid } from 'uid';
-import { onBeforeMount, onBeforeUnmount, ref, watch } from 'vue';
+import { onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import router from '../router';
-import { useRoute } from 'vue-router';
+import { RouterLink, useRoute } from 'vue-router';
 import { useDbStore } from '../stores/db';
-import type { IAction } from '../types/interfaces';
+import { useSettingsStore } from '../stores/settings';
+import type { IAction, IRoom } from '../types/interfaces';
 import { ActionType } from '../types/enums';
 import { useAlertStore } from '../stores/alert';
 
@@ -44,22 +53,22 @@ const videoElement = ref<HTMLMediaElement | null>(null);
 const uuid = uid(20);
 const roomUid = ref<string | null>(null);
 const videoLink = ref<string | null>(null);
+const videoTitle = ref<string | null>(null);
+const room = ref<IRoom | null>(null);
+const loading = ref(true);
 
 onBeforeMount(async () => {
   roomUid.value = route.params.id as string;
-  videoLink.value = await dbStore.getVideoLink(roomUid.value);
+  room.value = await dbStore.getRoom(roomUid.value);
+  videoLink.value = room.value !== null ? room.value.videoLink : null;
+  videoTitle.value = room.value !== null ? room.value.title : null;
 
-  if (videoLink.value) dbStore.watchLastAction(roomUid.value, uuid);
+  if (videoLink.value !== null) dbStore.watchLastAction(roomUid.value, uuid);
+
+  loading.value = false;
 });
 
-onBeforeUnmount(async () => {
-  if (!deletingRoom.value && videoLink.value) {
-    deletingRoom.value = true;
-    const leaveAction: IAction = { type: ActionType.leave, position: 0, uuid };
-
-    await dbStore.setLastAction(leaveAction, roomUid.value!);
-  }
-});
+onBeforeUnmount(async () => notifyLeave());
 
 watch(
   () => dbStore.$state,
@@ -75,11 +84,18 @@ watch(
     } else if (dbStore.type === ActionType.seek) {
       console.log('DB_SEEK');
 
+      if (!videoElement.value!.paused) trustedCanPlay.value = true;
+
       trustedSeek.value = false;
-      trustedCanPlay.value = true;
       videoElement.value!.currentTime = dbStore.position as number;
     } else if (dbStore.type === ActionType.join) {
       console.log('DB_JOIN');
+
+      trustedPause.value = false;
+
+      videoElement.value!.pause();
+      syncHandler();
+      console.log('sync');
       useAlertStore().show('Someone joined the room!', 'ok');
     } else if (dbStore.type === ActionType.kick) {
       console.log('DB_KICK');
@@ -93,6 +109,15 @@ watch(
     }
   },
   { deep: true }
+);
+
+watch(
+  () => videoElement.value,
+  () => {
+    if (deletingRoom.value) return;
+
+    videoElement.value!.volume = useSettingsStore().getVolume();
+  }
 );
 
 async function playHandler() {
@@ -125,6 +150,7 @@ async function seekHandler() {
   if (trustedSeek.value) {
     const action: IAction = { type: ActionType.seek, position: videoElement.value!.currentTime, uuid };
     await dbStore.setLastAction(action, roomUid.value!);
+    trustedCanPlay.value = false;
   } else {
     trustedSeek.value = true;
   }
@@ -158,6 +184,12 @@ async function deleteRoomHandler() {
   await router.push('/');
 }
 
+function volumeChangeHandler() {
+  console.log(`Volume change: ${videoElement.value!.volume} ${uuid}`);
+
+  useSettingsStore().setVolume(videoElement.value!.volume);
+}
+
 function emitPlay() {
   trustedSeek.value = false;
   trustedPlay.value = false;
@@ -173,9 +205,32 @@ function emitPause() {
   videoElement.value!.currentTime = dbStore.position as number;
   videoElement.value!.pause();
 }
+
+async function notifyLeave() {
+  if (!deletingRoom.value && videoLink.value) {
+    deletingRoom.value = true;
+    const leaveAction: IAction = { type: ActionType.leave, position: 0, uuid };
+
+    await dbStore.setLastAction(leaveAction, roomUid.value!);
+  }
+}
 </script>
 
 <style scoped>
+.title-placeholoder {
+  height: 30px;
+  width: 35%;
+  background-color: rgb(255, 255, 255, 0.2);
+  border-radius: 25px;
+  animation: 1s blink infinite;
+}
+
+.video-placeholoder {
+  background-color: rgb(255, 255, 255, 0.2);
+  border-radius: 15px;
+  animation: 1s blink infinite;
+}
+
 .container {
   position: relative;
 }
@@ -183,5 +238,20 @@ function emitPause() {
 .video {
   width: 64vw;
   height: 36vw;
+}
+
+@keyframes blink {
+  0% {
+    background-color: rgb(255, 255, 255, 0.2);
+  }
+  20% {
+    background-color: rgb(255, 255, 255, 0.4);
+  }
+  40% {
+    background-color: rgb(255, 255, 255, 0.2);
+  }
+  100% {
+    background-color: rgb(255, 255, 255, 0.2);
+  }
 }
 </style>

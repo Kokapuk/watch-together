@@ -15,11 +15,17 @@ export const useDbStore = defineStore('db', {
     return { type: null, position: 0, uuid: '', rooms: [] };
   },
   actions: {
-    async createRoom(roomUid: string, videoLink: string) {
-      await set(ref(getDatabase(), `rooms/${roomUid}/video-link`), videoLink);
+    async createRoom(roomUid: string, title: string, videoLink: string) {
+      await set(ref(getDatabase(), `rooms/${roomUid}`), { title, videoLink });
     },
     async deleteRoom(roomUid: string) {
       await remove(ref(getDatabase(), `rooms/${roomUid}`));
+    },
+    async getRoom(roomUid: string): Promise<IRoom | null> {
+      const dbRef = ref(getDatabase());
+      const snapshot = await get(child(dbRef, `rooms/${roomUid}`));
+
+      return snapshot.exists() ? snapshot.val() : null;
     },
     async getAllRooms(): Promise<IRoom[]> {
       const snapshot = await get(child(ref(getDatabase()), `rooms`));
@@ -78,11 +84,11 @@ export const useDbStore = defineStore('db', {
         this.uuid = data.uuid;
       });
     },
-    async getVideoLink(roomUid: string): Promise<string | null> {
-      const dbRef = ref(getDatabase());
-      const spanshot = await get(child(dbRef, `rooms/${roomUid}/video-link`));
+    // async getVideoLink(roomUid: string): Promise<string | null> {
+    //   const dbRef = ref(getDatabase());
+    //   const spanshot = await get(child(dbRef, `rooms/${roomUid}/video-link`));
 
-      return spanshot.exists() ? (spanshot.val() as string) : null;
-    },
+    //   return spanshot.exists() ? (spanshot.val() as string) : null;
+    // },
   },
 });
