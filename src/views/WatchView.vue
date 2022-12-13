@@ -68,7 +68,14 @@ onBeforeMount(async () => {
   loading.value = false;
 });
 
-onBeforeUnmount(async () => notifyLeave());
+onBeforeUnmount(() => notifyLeave());
+
+onbeforeunload = async (event) => {
+  event.preventDefault();
+  await notifyLeave();
+  router.push('/rooms');
+  event.returnValue = '';
+};
 
 watch(
   () => dbStore.$state,
