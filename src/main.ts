@@ -7,7 +7,6 @@ import router from './router';
 
 import './assets/styles/main.css';
 
-
 initializeApp({
   apiKey: import.meta.env.FIREBASE_API_KEY,
   authDomain: 'watch-together-1c3b2.firebaseapp.com',
