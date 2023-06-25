@@ -1,4 +1,4 @@
-# Chatty
+# Watch Together
 
 - On Frontend **(TypeScript)**
   - [Vite](https://vitejs.dev)
